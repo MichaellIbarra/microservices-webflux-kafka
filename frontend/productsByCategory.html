@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Productos</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+function buscar(){
+    let url = "http://localhost:8002/api/products/category/" + $("#categoria").val();
+    let token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc1MjE5NDM4OSwiYXV0aG9yaXRpZXMiOlsiUk9MRV9BRE1JTiIsIlJPTEVfVVNFUiJdLCJleHAiOjE3NTIyNzkzODl9.Ay0O6fmbSivC3S-3UPcib2F-Ox34PmkfPoLM-6IgaEGgkEEOKTdfTGYaA4A7yqmG0zj7Cj-1faghqfwzllqGVg"; // Pon aquí tu token JWT completo
+
+    fetch(url, {
+        headers: {
+            'Authorization': 'Bearer ' + token
+        }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+    })
+    .then(data => {
+        let titulos = "<thead><tr><th>Nombre</th><th>Precio</th><th>Stock</th><th></th></tr></thead>";
+        let filas = data.map(datos =>
+            "<tr><td>" + datos.name + "</td><td>" + datos.priceUnit + "</td><td>" + datos.stock + "</td><td><a href='#' onclick='eliminar(\"" + datos.id + "\")'>Eliminar</a></td></tr>"
+        ).join('');
+        $("#productos").html(titulos + filas);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+function eliminar(codProducto){
+    let url = "http://localhost:8002/api/products/" + codProducto;
+    let token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc1MjE5NDM4OSwiYXV0aG9yaXRpZXMiOlsiUk9MRV9BRE1JTiIsIlJPTEVfVVNFUiJdLCJleHAiOjE3NTIyNzkzODl9.Ay0O6fmbSivC3S-3UPcib2F-Ox34PmkfPoLM-6IgaEGgkEEOKTdfTGYaA4A7yqmG0zj7Cj-1faghqfwzllqGVg"; // Pon aquí tu token JWT completo
+
+    $.ajax({
+        url: url,
+        method: "DELETE",
+        headers: {
+            'Authorization': 'Bearer ' + token
+        },
+        success: function(){
+            buscar();
+        },
+        error: function(xhr, status, error) {
+            console.error('Error deleting product:', error);
+        }
+    });
+}
+</script>
+</head>
+<body>
+	<div class="container">
+		<br><br>
+		<form class="form-horizontal">
+			<div class="form-group">
+				<label class="control-label col-sm-2">Introduce categoría:</label>
+				<div class="col-sm-5">
+					<input class="form-control" type="text" id="categoria">
+				</div>
+			</div>		
+			<div class="form-group">
+    			<div class="col-sm-offset-2 col-sm-10">
+		      		<input type="button" class="btn btn-primary" onclick="buscar();" value="Buscar">
+		      	</div>
+		    </div>
+		</form>
+		<br><br>
+		<div>
+			<table class="table table-bordered" id="productos"></table>
+		</div>	
+	</div>
+</body>
+</html>
